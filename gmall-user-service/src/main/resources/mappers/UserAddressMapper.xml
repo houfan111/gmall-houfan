@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.houfan.gmall.user.mapper.UserAddressMapper" >
+
+    <resultMap id="selectUserAddressListByUserIdMap" type="com.houfan.gmall.bean.UserAddress" autoMapping="true">
+
+    </resultMap>
+
+    <select id="selectUserAddressListByUserId" resultMap="selectUserAddressListByUserIdMap">
+    SELECT  address.*
+    from user_address as address
+    where address.user_id=#{userId}
+    </select>
+</mapper>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.houfan.gmall.manager.mapper.BaseCatalog2Mapper" >
+    <select id="selectBaseCatalog2ListByC1Id" resultType="com.houfan.gmall.bean.BaseCatalog2">
+        SELECT id,name,catalog1_id FROM base_catalog2
+        WHERE catalog1_id = #{catalog1Id}
+    </select>
+</mapper>

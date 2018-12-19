@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.houfan.gmall.manager.mapper.SpuSaleAttrValueMapper" >
+  <select id="selectSpuSaleAttrValueListBySpuId" resultType="com.houfan.gmall.bean.SpuSaleAttrValue">
+        SELECT sale_attr_value_name,sale_attr_id,id,spu_id FROM spu_sale_attr_value
+        WHERE spu_id = #{spuId} and sale_attr_id = #{saleAttrId}
+    </select>
+
+
+<!--    <select id="selectSpuSaleAttrValueListBySpuIdAndSkuId" resultType="com.houfan.gmall.bean.SpuSaleAttrValue">
+        SELECT sav.id,sav.sale_attr_value_name,sav.sale_attr_id,sav.spu_id,
+        IF(skv.sku_id,1,0) as isChecked
+        FROM spu_sale_attr sa
+        INNER JOIN spu_sale_attr_value sav
+        on sa.sale_attr_id = sav.sale_attr_id
+        AND sa.spu_id =sav.spu_id
+        and sa.spu_id = #{spuId}
+        LEFT JOIN sku_sale_attr_value skv
+        on skv.sale_attr_id = sa.sale_attr_id
+        and skv.sale_attr_value_id = sav.id
+        and skv.sku_id = #{skuId}
+        where sav.sale_attr_id = #{saleAttrId}
+    </select> -->
+
+</mapper>

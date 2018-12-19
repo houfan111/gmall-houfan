@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+<body>
+
+<!-----------------弹出框----------------------------->
+<div id="spuSaleAttr_dlg" class="easyui-dialog" title="编辑销售属性" style="width:500px;height:400px;"
+     closed="true"  data-options="iconCls:'icon-save',resizable:true,modal:false" buttons="#spuSaleAttrBtns" >
+    <br/><br/>
+    <!------------------从基本销售属性中选择(此处的url是获取下拉列表)------------->
+    销售属性：  <select name="saleAttr" id="saleAttrSelect"
+                   class="easyui-combobox" data-options="valueField:'id',textField:'name',url:'baseSaleAttrList'"
+                   style="width:100px">  </select>
+    <br/><br/>
+
+
+    <!----------------销售属性值列表---------------------------->
+    <table id="spuSaleAttrValueDg" class="easyui-datagrid" title="销售属性值列表"
+           data-options="singleSelect:true,method:'get'" ></table>
+</div>
+
+<div id="spuSaleAttrBtns">
+    <a href="#" class="easyui-linkbutton" onclick="saveSaleAttrValue()">保存</a>
+    <a href="#" class="easyui-linkbutton" onclick="unSaveSaleAttrValue()">关闭</a>
+</div>
+
+<div id="warningCover" class="easyui-dialog" title="警告框" style="width:300px;height:200px" closed="true"
+     data-options="iconCls:'icon-save',modal:false,resizable:true" buttons="#warning">
+    已经选择了该属性值,再次添加将会覆盖,确认覆盖吗?
+</div>
+<div id="warning">
+    <a href="#" class="easyui-linkbutton" onclick="doCover()">确定覆盖</a>
+    <a href="#" class="easyui-linkbutton" onclick="unDoCover()">重新选择</a>
+</div>
+
+<!--  第三层页面 -->
+<script language="JavaScript" >
+
+    function doCover() {
+        alert("确认覆盖");
+        return true;
+    }
+
+    function unDoCover() {
+        alert("取消覆盖");
+        $("#warningCover").window("close");
+        return false;
+    }
+
+    function checkCover(saleAttrId) {
+        // 得到了整个三级页面的数据,需要往二级页面暂存,首先判断二级页面是否最开始就已经有相同属性编号的行,有就直接删除
+        // 遍历所有的行.然后如果发现存在与所要添加的行所对应的编号,直接给出提示,删除
+        var rows = $("#spuSaleAttrDg").datagrid("getRows");
+        $(rows).each(function (i,row) {
+            if (row.saleAttrId == saleAttrId){
+                // 如果这个已经存在,直接删除
+                //console.log("需要删除的行索引是" + i);
+                //$("#warningCover").window("open");
+                    $("#spuSaleAttrDg").datagrid("deleteRow",i);
+            }
+        });
+    }
+
+    // 点击保存按钮(将数据不保存到数据库,保存到第二个页面的暂存区)
+    function saveSaleAttrValue() {
+        // 将数据追加到页面二的属性列表中
+        // 首先需要获得选取的下拉列表销售属性的编号
+        var saleAttrId = $("#saleAttrSelect").combobox("getValue");
+        var saleAttrName = $("#saleAttrSelect").combobox("getText");
+        layer.msg("选择的属性编号是" + saleAttrId);
+        // 保存的是数据表格中加载的数据
+        var spuSaleAttrValueJson = $("#spuSaleAttrValueDg").datagrid("getData");
+
+        // 调用确认方法
+        checkCover(saleAttrId);
+
+
+        // 将数据添加到数据表格中
+        $("#spuSaleAttrDg").datagrid( "appendRow",
+            {   saleAttrId:saleAttrId,
+                saleAttrName:saleAttrName,
+                spuSaleAttrValueJson:spuSaleAttrValueJson
+            });
+
+        // 关闭三级对话框
+        $("#spuSaleAttr_dlg").dialog("close");
+    }
+
+    // 点击关闭按钮,关闭弹框
+    function unSaveSaleAttrValue() {
+        $("#spuSaleAttr_dlg").dialog("close");
+    }
+
+    function addSpuSaleValueAttr() {
+        layer.msg("添加销售属性值");
+
+    }
+
+
+    /**
+     * 初始化添加属性值列表
+     */
+    function initSpuSaleAttrValueListDatagrid() {
+        // 每次打开应该清空数据表格
+        $("#spuSaleAttrValueDg").datagrid('loadData', { total: 0, rows: [] });
+        $("#spuSaleAttrValueDg").datagrid({
+            columns:[[
+                { field:'id',title:'销售属性值id',width:'50%'},
+                { field:'saleAttrValueName',title:'销售属性值名称',width:'50%',
+                    editor: {
+                        type: 'validatebox', options: { required: true}  //必填项
+                    }
+                }
+            ]],
+            toolbar:[
+                {text:'添加',iconCls:'icon-add',
+                    handler:function () {
+                        // 需要判断是否选择下拉列表属性名称,否则不能添加
+                        if(!$("#saleAttrSelect").combobox("getValue")){
+                            layer.msg("请选择属性名称");
+                            return ;
+                        }
+                        $("#spuSaleAttrValueDg").datagrid('appendRow',{
+                            id:'自动添加',
+                            saleAttrValueName:'新销售属性值名称'
+                        });
+                    }
+                },
+                '-'
+                ,
+                {text:'删除',iconCls:'icon-remove',
+                    handler:function () {
+                        var row = $("#spuSaleAttrValueDg").datagrid('getSelected');
+                        if (row) {
+                            var rowIndex = $("#spuSaleAttrValueDg").datagrid('getRowIndex', row);
+                            $("#spuSaleAttrValueDg").datagrid('deleteRow', rowIndex);
+                        }
+                    }
+                }],
+            onDblClickRow: function (rowIndex, rowData) {
+                //双击开启编辑行
+                $("#spuSaleAttrValueDg").datagrid("beginEdit", rowIndex);
+                //设定当失去焦点时,退出编辑状态
+                var valueName = rowData.valueName;
+                $("input.datagrid-editable-input").val(valueName).bind("blur",function(evt){
+                    $("#spuSaleAttrValueDg").datagrid('endEdit',rowIndex);
+                });
+            }
+        });
+    }
+
+</script>
+</body>
+</html>
